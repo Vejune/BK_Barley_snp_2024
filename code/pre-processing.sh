@@ -195,3 +195,5 @@ done
 #     RGSM=Sample_tw_pool \ 
 #     RGPU=unit_tw_pool \
 #     CREATE_INDEX=FALSE
+
+test
