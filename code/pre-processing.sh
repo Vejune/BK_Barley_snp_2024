@@ -145,13 +145,39 @@ for i in fixed_group_bam/*.bam
 #      -O somatic.vcf.gz
 
 
+# for i in fixed_group_bam/*.bam
+#        do
+#        base=$(basename $i _final.bam)
+#        $GATK Mutect2 \
+#        -R ref/HV_M3_genome.fa  \
+#        -I $i \
+#        -O Mutect2/${base}_mutect.vcf.gz
+#        --create-output-variant-index FALSE
+# done
+
+#nesigauna ant viso genomo muttect2: Index 32770 out of bounds for length 32770
+#Bandau tik ant 5 chr
+
+
 for i in fixed_group_bam/*.bam
+      do
+      base=$(basename $i _final.bam)
+      samtools view -@ 6 -b $i "5H:400000000-590000000" > 5H_bam/${base}_5H.bam
+done
+
+for i in 5H_bam/*.bam
        do
-       base=$(basename $i _final.bam)
+       base=$(basename $i _5H.bam)
+       samtools index -@ 8 $i
+done
+
+for i in 5H_bam/*.bam
+       do
+       base=$(basename $i _5H.bam)
        $GATK Mutect2 \
        -R ref/HV_M3_genome.fa  \
        -I $i \
-       -O Mutect2/${base}_mutect2.vcf.gz
+       -O Mutect2/${base}_mutect_5H.vcf.gz
        --create-output-variant-index FALSE
 done
 
@@ -196,4 +222,42 @@ done
 #     RGPU=unit_tw_pool \
 #     CREATE_INDEX=FALSE
 
-test
+
+
+#Index
+for i in Mutect2/*vcf.gz
+       do
+       base=$(basename $i _mutect2.vcf.gz)
+       bcftools index -f $i
+done
+
+#Anotate
+
+for i in Mutect2/*vcf.gz
+       do
+       base=$(basename $i _mutect2.vcf.gz)
+       bcftools view -r 
+done
+
+snpEff Hordeum_vulgare called_AII_5H.vcf.gz > annot_AII_5H.vcf.gz
+
+for i in Mutect2/*vcf.gz
+       do
+       base=$(basename $i _mutect2.vcf.gz)
+       snpEff Hordeum_vulgare $i > ./Annot/${base}_annot.vcf.gz
+done
+
+for i in Annot/*_annot.vcf.gz
+      do
+      base=$(basename $i _annot.vcf.gz)
+      cat $i > ./Annot/${base}_annot.vcf
+done
+
+
+
+
+
+cat annot_AII_5H.vcf.gz | grep -E 'AC=|^\#CHROM|^##' > annot_var_AII_5H.vcf
+bcftools query -f "%CHROM\t%POS\t%REF\t%ALT\t%DP\t%DP4\t%MQ0F\t%MQ\t%ANN\t[%GT]\n" annot_var_AII_5H.vcf | 
+awk -v FS="\t" 'BEGIN{print "CHR", "POS", "REF", "ALT", "DP", "DP4", "MAF", "MQ0F", "MQ", "ANN"} $5>5 {split($6, d, ","); ref=d[1]+d[2]; alt=d[3]+d[4];
+print substr($1, 1,1), $2, $3, $4, $5, ref+alt, alt/(ref+alt), $7, $8, $9}' > annot_var_AII_5H.txt
