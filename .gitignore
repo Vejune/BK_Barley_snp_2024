@@ -6,3 +6,14 @@
 /Annot
 /dysgu
 /5H_bam
+/BAM
+/raw
+/inputs
+/trim
+/trim_batch
+/map
+/Mutmap_results
+/Mutmap_snp
+/WT
+tmp.bam
+tmp.sam
