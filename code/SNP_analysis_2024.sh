@@ -24,8 +24,7 @@ done
 
 fastqc ./trim/*.fq.gz
 
-#a lot of ggggg ant *_2.fq.gz, when removed with --nextseq-trim=20, Per base sequence content ant the end is not good,
-# lets see whats happens after merge, maybe remove 3 last bases (but dont wanna trim too much)?
+#a lot of ggggg at *_2.fq.gz, when removed with --nextseq-trim=20, Per base sequence content at the end: G drops (logical, removed all G repeant from seq ends)
 
 #merge batches
 
@@ -74,5 +73,3 @@ do
 	base=$(basename $i .vcf.gz)
 	echo "mutplot -v $i -o ./Mutmap_results/${base} -n 50"
 done
-
-d
